@@ -23,19 +23,25 @@
 
 module uart_tx_tb;
 
-    reg clk;
-    reg rst_n;
-    reg tx_start;
-    reg [7:0] data_in;
+    parameter CLK_FREQ      = 100;
+    parameter BAUD_RATE     = 10;
+    parameter PARITY_ENABLE = 1;
+    parameter PARITY_TYPE   = 0;
 
-    wire tx;
-    wire tx_busy;
+    reg        clk;
+    reg        rst_n;
+    reg        tx_start;
+    reg [7:0]  data_in;
+
+    wire       tx;
+    wire       tx_busy;
 
     uart_tx #(
-        .CLK_FREQ(100),
-        .BAUD_RATE(10)
-    )
-    DUT (
+        .CLK_FREQ(CLK_FREQ),
+        .BAUD_RATE(BAUD_RATE),
+        .PARITY_ENABLE(PARITY_ENABLE),
+        .PARITY_TYPE(PARITY_TYPE)
+    ) dut (
         .clk(clk),
         .rst_n(rst_n),
         .tx_start(tx_start),
@@ -45,21 +51,19 @@ module uart_tx_tb;
     );
 
     initial
-    begin
         clk = 1'b0;
 
-        forever
-            #5 clk = ~clk;
-    end
-    
-        initial
+    always #5 clk = ~clk;
+
+    initial
     begin
         rst_n    = 1'b0;
         tx_start = 1'b0;
-        data_in  = 8'h00;
+        data_in  = 8'd0;
 
         #20;
         rst_n = 1'b1;
+
 
         #20;
 
@@ -71,6 +75,7 @@ module uart_tx_tb;
 
         wait (tx_busy == 1'b0);
 
+
         #100;
 
         data_in  = 8'h55;
@@ -81,7 +86,9 @@ module uart_tx_tb;
 
         wait (tx_busy == 1'b0);
 
-        #100;
-        $finish;
+        #200;
+
+        $stop;
     end
+
 endmodule
